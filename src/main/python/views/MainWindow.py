@@ -46,7 +46,9 @@ class MainWindow(QtWidgets.QMainWindow):
             menus=[
                 self.buildFileMenu(),
                 self.buildLeadMenu(),
-                self.buildHelpMenu()
+                self.buildHelpMenu(),
+                self.buildRunMenu(),
+                self.buildPresetMenu(),
             ]
         )
 
@@ -186,6 +188,46 @@ class MainWindow(QtWidgets.QMainWindow):
                     shortcut=None,
                     statusTip="Report and Issue on GitHub"
                 )
+            ]
+        )
+    
+    def buildRunMenu(self):
+        return Qt.Menu(
+            owner=self,
+            name='Process Multiple',
+            displayName='Run',
+            items=[
+                Qt.MenuAction(
+                    owner=self,
+                    name="runFolder",
+                    displayName="Process Folder",
+                    shortcut=QtGui.QKeySequence('Ctrl+Enter'),
+                    statusTip="Process all in a folder with current lead locations"
+                ),
+                
+            ]
+        )
+    
+    def buildPresetMenu(self):
+        return Qt.Menu(
+            owner=self,
+            name='Presets',
+            displayName='Presets',
+            items=[
+                Qt.MenuAction(
+                    owner=self,
+                    name="preset1",
+                    displayName="Preset 1",
+                    shortcut=None,
+                    statusTip="Sets the current preset"
+                ),
+                Qt.MenuAction(
+                    owner=self,
+                    name="presetNone",
+                    displayName="No Preset",
+                    shortcut=None,
+                    statusTip="Resets all preset image annotations"
+                ),
             ]
         )
 

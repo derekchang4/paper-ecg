@@ -101,6 +101,18 @@ class Editor(QtWidgets.QWidget):
             cropping = lead['cropping']
             self.addLead(leadIdEnum=LeadId[name], x=cropping['x'], y=cropping['y'], width=cropping['width'], height=cropping['height'], startTime=lead['start'])
 
+    ## dmchang: 9/30 Unnecessary?
+    def loadSavedPreset(self, data):
+        self.EditPanelGlobalView.setRotation(data['rotation'])
+        self.EditPanelGlobalView.setValues(voltScale=data['voltageScale'], timeScale=data['timeScale'])
+        self.EditPanelGlobalView.setLastSavedTimeStamp(data['timeStamp'])
+
+        leads = data['leads']
+        for name in leads:
+            lead = leads[name]
+            cropping = lead['cropping']
+            self.addLead(leadIdEnum=LeadId[name], x=cropping['x'], y=cropping['y'], width=cropping['width'], height=cropping['height'], startTime=lead['start'])
+
 
     ###########################
     # Control Panel Functions #

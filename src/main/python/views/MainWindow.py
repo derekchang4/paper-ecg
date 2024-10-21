@@ -10,13 +10,15 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from views.EditorWidget import Editor
 from model.Lead import LeadId
+from controllers import MainController
 import QtWrapper as Qt
 
 
 class MainWindow(QtWidgets.QMainWindow):
 
-    def __init__(self):
+    def __init__(self, mainController: MainController):
         super().__init__()
+        self.mainController = mainController
 
         self.buildUI()
 
@@ -47,7 +49,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.buildFileMenu(),
                 self.buildLeadMenu(),
                 self.buildHelpMenu(),
-                self.buildRunMenu(),
+                self.buildFolderMenu(),
                 self.buildPresetMenu(),
             ]
         )
@@ -191,15 +193,22 @@ class MainWindow(QtWidgets.QMainWindow):
             ]
         )
     
-    def buildRunMenu(self):
+    def buildFolderMenu(self):
         return Qt.Menu(
             owner=self,
             name='Process Multiple',
-            displayName='Run',
+            displayName='Folder',
             items=[
                 Qt.MenuAction(
                     owner=self,
-                    name="runFolder",
+                    name="openFolder",
+                    displayName="Open Folder",
+                    shortcut=None,
+                    statusTip="Iterate over a folder to set leads manually"
+                ),
+                Qt.MenuAction(
+                    owner=self,
+                    name="processFolder",
                     displayName="Process Folder",
                     shortcut=QtGui.QKeySequence('Ctrl+Enter'),
                     statusTip="Process all in a folder with current lead locations"
@@ -250,3 +259,17 @@ class MainWindow(QtWidgets.QMainWindow):
             LeadId.V5: self.addLeadV5,
             LeadId.V6: self.addLeadV6
         }
+
+            
+    def keyPressEvent(self, event):
+        print("Raaa key event")
+        print(f"Key pressed: {event.key()}")
+        if event.key() == QtCore.Qt.Key_Comma:
+            print("Left")
+            self.mainController.folderController.loadPreviousImage()  # Left arrow key to go to previous ECG
+        elif event.key() == QtCore.Qt.Key_Period:
+            print("Right")
+            self.mainController.folderController.loadNextImage()  # Right arrow key to go to next ECG
+        elif event.key() == QtCore.Qt.Key_Return:
+            print("Enter")
+            self.mainController.confirmDigitization()  # Enter key to process the ECG

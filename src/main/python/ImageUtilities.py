@@ -11,11 +11,14 @@ import cv2
 import numpy as np
 from PyQt5 import QtGui
 import scipy.stats as stats
+import pdf2image as pdf2image
 
 
 def readImage(path: Path) -> np.ndarray:
-    return cv2.imread(str(path.absolute()))
-
+    if path.suffix == '.pdf':
+        return _pdf2png(path)
+    else:
+        return cv2.imread(str(path.absolute()))
 
 def opencvImageToPixmap(image):
     # SOURCE: https://stackoverflow.com/a/50800745/7737644 (Creative Commons - Credit, share-alike)
@@ -34,3 +37,14 @@ def opencvImageToPixmap(image):
     )
 
     return pixmap
+
+def _pdf2png(pdfPath: Path) -> np.ndarray:
+    # https://stackoverflow.com/questions/14134892/convert-image-from-pil-to-opencv-format 
+    # Poppler must in dependencies
+
+    # Only convert first page
+    dpi = 400   # Default is 200
+    pdfPilImage = pdf2image.convert_from_path(str(pdfPath.absolute()), dpi)[0].convert('RGB')
+    open_cv_image = np.array(pdfPilImage)
+    open_cv_image = open_cv_image[:, :, ::-1].copy()
+    return open_cv_image

@@ -262,7 +262,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             
     def keyPressEvent(self, event):
-        print("Raaa key event")
+        print("[key event]")
         print(f"Key pressed: {event.key()}")
         if event.key() == QtCore.Qt.Key_Comma:
             print("Left")

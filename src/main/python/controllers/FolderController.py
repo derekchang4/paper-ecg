@@ -19,7 +19,7 @@ class FolderController:
             return
         
         # Get the supported files in the folder
-        self.imageFiles = list(sorted(chain(directory.glob('*.png'), directory.glob('*.jpg'), directory.glob('*.jpeg'), directory.glob('*.tif'), directory.glob('*.tiff'))))
+        self.imageFiles = list(sorted(chain(directory.glob('*.png'), directory.glob('*.jpg'), directory.glob('*.jpeg'), directory.glob('*.tif'), directory.glob('*.tiff'), directory.glob("*.pdf"))))
         self.currentImageIndex = 0  # Starting from first image
         self.loadCurrentImage()     # Load first image
 

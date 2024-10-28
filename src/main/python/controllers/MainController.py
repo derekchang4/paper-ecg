@@ -74,7 +74,7 @@ class MainController:
 
         # Per pathlib documentation, if no selection is made then Path('.') is returned
         #  https://docs.python.org/3/library/pathlib.html
-        path = Path(self.openFileBrowser("Open File", "Images (*.png *.jpg *.jpeg *.tif *.tiff)"))
+        path = Path(self.openFileBrowser("Open File", "Images (*.png *.jpg *.jpeg *.tif *.tiff *.pdf)"))
 
         if path != Path('.'):
             self.window.editor.loadImageFromPath(path)
@@ -363,7 +363,7 @@ class MainController:
             return
 
         print(f"Globbing")
-        files = chain(directory.glob('*.png'), directory.glob('*.jpg'), directory.glob('*.jpeg'), directory.glob('*.tif'), directory.glob('*.tiff'))
+        files = chain(directory.glob('*.png'), directory.glob('*.jpg'), directory.glob('*.jpeg'), directory.glob('*.tif'), directory.glob('*.tiff'), directory.glob('*.pdf'))
         print(f"Directory: {directory}")
         print(f"Files: {files}")
 

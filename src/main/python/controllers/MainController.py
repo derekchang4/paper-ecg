@@ -32,6 +32,7 @@ from model.Lead import Lead, LeadId
 import datetime
 from model.InputParameters import InputParameters
 
+import traceback
 
 class MainController:
 
@@ -253,6 +254,9 @@ class MainController:
         self.window.editor.EditPanelGlobalView.setLastSavedTimeStamp(currentDateTime)
 
     def attempToLoadAnnotations(self):
+        # DEBUG
+        #for line in traceback.format_stack():
+        #    print(line.strip())
         if self.window.editor.image is None:
             print("[Couldn't load annotation] No image")
             return

@@ -40,10 +40,10 @@ def opencvImageToPixmap(image):
 
 def _pdf2png(pdfPath: Path) -> np.ndarray:
     # https://stackoverflow.com/questions/14134892/convert-image-from-pil-to-opencv-format 
-    # Poppler must in dependencies
+    # Poppler must be in dependencies
 
     # Only convert first page
-    dpi = 400   # Default is 200
+    dpi = 200   # Default is 200
     pdfPilImage = pdf2image.convert_from_path(str(pdfPath.absolute()), dpi)[0].convert('RGB')
     open_cv_image = np.array(pdfPilImage)
     open_cv_image = open_cv_image[:, :, ::-1].copy()

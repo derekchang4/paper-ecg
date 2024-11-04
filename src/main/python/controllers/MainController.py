@@ -16,13 +16,16 @@ from PyQt5.QtWidgets import QFileDialog
 
 from ecgdigitize.image import ColorImage, openImage
 import ImageUtilities
+from itertools import chain
 
 from Conversion import convertECGLeads, exportSignals
+from controllers.FolderController import FolderController
 from views.MainWindow import MainWindow
 from views.ImageView import *
 from views.EditorWidget import *
 from views.ROIView import *
-from views.ExportFileDialog import *
+#from views.ExportFileDialog import *
+from views.ExportFileDialog2 import *
 from QtWrapper import *
 import Annotation
 from model.Lead import Lead, LeadId
@@ -33,7 +36,8 @@ from model.InputParameters import InputParameters
 class MainController:
 
     def __init__(self):
-        self.window = MainWindow()
+        self.window = MainWindow(self)
+        self.folderController = FolderController(self)
         self.connectUI()
         self.openFile = None
 
@@ -48,12 +52,18 @@ class MainController:
         Hook UI up to handlers in the controller
         """
         self.window.fileMenuOpen.triggered.connect(self.openImageFile)
+
+        # File Controller integration
+        self.window.editor.EditPanelGlobalView.nextButton.clicked.connect(self.folderController.loadNextImage)
+        self.window.editor.EditPanelGlobalView.prevButton.clicked.connect(self.folderController.loadPreviousImage)
+        self.window.openFolder.triggered.connect(self.folderController.openFolderThenLoad)
+
         self.window.fileMenuClose.triggered.connect(self.closeImageFile)
         self.window.editor.processEcgData.connect(self.confirmDigitization)
         self.window.editor.saveAnnotationsButtonClicked.connect(self.saveAnnotations)
         
         ## Preset 9/22/24
-        self.window.runFolder.triggered.connect(self.runFolder)
+        self.window.processFolder.triggered.connect(self.processFolder)
         self.window.preset1.triggered.connect(self.loadPreset1)
         self.window.presetNone.triggered.connect(self.loadPresetNone)
 
@@ -72,6 +82,7 @@ class MainController:
             self.openFile = path
             self.openImage = openImage(path)
             self.attempToLoadAnnotations()
+            self.folderController.loadImagesFromFolder(path.parent) # Queue up the other files in the folder
         else:
             print("[Warning] No image selected")
 
@@ -106,7 +117,7 @@ class MainController:
         Returns:
             str: Path to the selected file.
         """
-        print("Openeing folder")
+        print("Opening folder")
         absolutePath = str(QFileDialog.getExistingDirectory(self.window,
                                                             caption,
                                                             initialPath))
@@ -216,11 +227,12 @@ class MainController:
 
         filePath = metadataDirectory / (self.openFile.stem + '-' + self.openFile.suffix[1:] + '.json')
 
-        if self.preset != None:
-            filePath = self.preset
+        ## Saving modified preset
+        #if self.preset != None:
+        #    filePath = self.preset
             
 
-        print("leads\n", inputParameters.leads.items())
+        #print("leads\n", inputParameters.leads.items())
 
         leads = {
             name: extractLeadAnnotation(lead) for name, lead in inputParameters.leads.items()
@@ -242,16 +254,19 @@ class MainController:
 
     def attempToLoadAnnotations(self):
         if self.window.editor.image is None:
+            print("[Couldn't load annotation] No image")
             return
 
         assert self.openFile is not None
 
         metadataDirectory = self.openFile.parent / '.paperecg'
         if not metadataDirectory.exists():
+            print("[Couldn't load annotation] No metadata directory")
             return
 
         filePath = metadataDirectory / (self.openFile.stem + '-' + self.openFile.suffix[1:] + '.json')
         if not filePath.exists():
+            print("[Couldn't load annotation] File not found")
             return
 
         print("Loading saved state from:", filePath, '...')
@@ -260,6 +275,8 @@ class MainController:
         with open(filePath) as file:
             data = json.load(file)
 
+        # Delete all existing ROIs first
+        self.window.editor.deleteAllLeadRois()
         self.window.editor.loadSavedState(data)
 
     def getCurrentInputParameters(self):
@@ -294,7 +311,8 @@ class MainController:
         self.window.editor.resetImageEditControls()
         self.window.editor.deleteAllLeadRois()
         self.window.editor.loadSavedPreset(data)
-        self.window.editor.EditPanelGlobalView.saveAnnotationsButton.setText("Save Metadata (Current Preset)")
+
+        # self.window.editor.EditPanelGlobalView.saveAnnotationsButton.setText("Save Metadata (Current Preset)")
         
     def loadPreset1(self):
         ## Must open a file from that folder first
@@ -315,7 +333,7 @@ class MainController:
             self.preset == None
 
 
-    def runFolder(self):
+    def processFolder(self):
         # Prompt for the folder to analyze
 
         # <- One-off utility to save I lead as file ->
@@ -345,7 +363,7 @@ class MainController:
             return
 
         print(f"Globbing")
-        files = directory.glob('*.png')
+        files = chain(directory.glob('*.png'), directory.glob('*.jpg'), directory.glob('*.jpeg'), directory.glob('*.tif'), directory.glob('*.tiff'))
         print(f"Directory: {directory}")
         print(f"Files: {files}")
 
@@ -381,7 +399,6 @@ class MainController:
                 break
 
     def getMetaDataDirectory(self):
-        # 3593884
         # probability density (/distribution) function
         # probability mass function = discrete
         # cumulative distribution function both

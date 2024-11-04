@@ -17,6 +17,7 @@ from QtWrapper import *
 from views.MessageDialog import *
 
 class Editor(QtWidgets.QWidget):
+    '''Creates the UI for the side panel editor, leads, and image view'''
     processEcgData = QtCore.pyqtSignal()
     saveAnnotationsButtonClicked = QtCore.pyqtSignal()
 

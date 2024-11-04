@@ -92,6 +92,16 @@ class EditPanelGlobalView(QtWidgets.QWidget):
                 name="saveAnnotationsButton",
                 text="Save Metadata"
             ),
+            PushButton(
+                owner=self,
+                name="nextButton",
+                text="Next Image"
+            ),
+            PushButton(
+                owner=self,
+                name="prevButton",
+                text="Previous Image"
+            ),
             Label(
                 owner=self,
                 name="lastSavedTimeStamp",

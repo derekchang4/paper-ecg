@@ -19,14 +19,15 @@ class FolderController:
             return
         
         # Get the supported files in the folder
-        self.imageFiles = list(sorted(chain(directory.glob('*.png'), directory.glob('*.jpg'), directory.glob('*.jpeg'), directory.glob('*.tif'), directory.glob('*.tiff'))))
+        self.imageFiles = list(sorted(chain(directory.glob('*.png'), directory.glob('*.jpg'), directory.glob('*.jpeg'), directory.glob('*.tif'), directory.glob('*.tiff'), directory.glob("*.pdf"))))
         self.currentImageIndex = 0  # Starting from first image
-        self.loadCurrentImage()     # Load first image
+        #self.loadCurrentImage()     
 
     def openFolderThenLoad(self):
         '''Opens a folder dialog'''
         directory = Path(self.mainController.openFolderBrowser("Select a Folder"))
         self.loadImagesFromFolder(directory)
+        self.loadCurrentImage() # Load first image
 
     def loadCurrentImage(self):
         '''Loads the current image into the view'''

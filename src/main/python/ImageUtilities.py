@@ -12,15 +12,18 @@ import numpy as np
 from PyQt5 import QtGui
 import scipy.stats as stats
 import pdf2image as pdf2image
+#import pdfplumber as pdfplumber
 
 
 def readImage(path: Path) -> np.ndarray:
     if path.suffix == '.pdf':
+        #return _pdfPlumber(path)
         return _pdf2png(path)
     else:
         return cv2.imread(str(path.absolute()))
 
 def opencvImageToPixmap(image):
+    # Uses a np array image
     # SOURCE: https://stackoverflow.com/a/50800745/7737644 (Creative Commons - Credit, share-alike)
 
     height, width, channel = image.shape
@@ -48,3 +51,7 @@ def _pdf2png(pdfPath: Path) -> np.ndarray:
     open_cv_image = np.array(pdfPilImage)
     open_cv_image = open_cv_image[:, :, ::-1].copy()
     return open_cv_image
+
+#def _pdfPlumber(pdfPath: Path) -> np.ndarray:
+#    with pdfplumber.open(pdfPath) as pdf:
+#        return pdf.pages[0].to_image(resolution = 200)

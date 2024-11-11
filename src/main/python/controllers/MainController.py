@@ -31,6 +31,7 @@ import Annotation
 from model.Lead import Lead, LeadId
 import datetime
 from model.InputParameters import InputParameters
+import ecgdigitize.image as image
 
 import traceback
 
@@ -176,7 +177,7 @@ class MainController:
                 self.exportECGData(exportFileDialog.fileExportPath, exportFileDialog.delimiterDropdown.currentText(), extractedSignals)
 
     # we have all ECG data and export location - ready to pass off to backend to digitize
-    def processEcgDataNoDialog(self, inputParameters, filepath: str, delimiter: str):
+    def processEcgDataNoDialog(self, inputParameters, filepath: Path, delimiter: str, previewImgPath: Path):
         '''For calling the function without a file explorer dialog'''
         if self.window.editor.image is None:
             raise Exception("IMAGE NOT AVAILABLE WHEN `processEcgData` CALLED")
@@ -191,9 +192,13 @@ class MainController:
             errorDialog.exec_()
         else:
             self.exportECGData(filepath, delimiter, extractedSignals)
-            #for lead, img in previewImages.items():
-            #    pixmap = ImageUtilities.opencvImageToPixmap(img)
-            #    pixmap.save(self.getMetaDataDirectory() / self.openFile, "jpg")
+            print(f"Exported CSV to: {filepath}")
+            print(f"Exporting lead previews to: {previewImgPath}\[file]\[leadId]")
+            for lead, img in previewImages.items():
+                imgDirectory = previewImgPath / self.openFile.stem
+                imgDirectory.mkdir(exist_ok=True)   # Make directory if not existing
+                print(f"Saving img to: {imgDirectory / f'{filepath.name}_{lead.name}.jpg'}")
+                image.saveImage(img, imgDirectory / f"{filepath.name}_{lead.name}.jpg")
 
 
     def exportECGData(self, exportPath, delimiter, extractedSignals):
@@ -371,16 +376,18 @@ class MainController:
         print(f"Directory: {directory}")
         print(f"Files: {files}")
 
-        ## Create a progress bar
+        ## TODO: Create a progress bar
         self.progress = QtWidgets.QProgressBar()
         #self.progress.setGeometry(200, 80, 250, 20)
 
         ## Ensure an exported_leads file is created
-        metaDataDirectory = self.getMetaDataDirectory()
-        exportDirectory = metaDataDirectory / 'exported_leads'
-        imagePreviewDirectory = metaDataDirectory / 'image_previews'
+        exportDirectory = directory / 'exported_leads'
+        imagePreviewDirectory = directory / 'image_previews'
+        print(f"exportDir: {exportDirectory}")
         if not exportDirectory.exists():
             exportDirectory.mkdir()
+        if not imagePreviewDirectory.exists():
+            imagePreviewDirectory.mkdir()
 
         for file in files:
             print(f"Discovered {file}")
@@ -391,9 +398,8 @@ class MainController:
             inputParameters = self.getCurrentInputParameters()
 
             if len(inputParameters.leads) > 0:
-                self.processEcgData(inputParameters)
-                #self.processEcgDataNoDialog(inputParameters, self.getMetaDataDirectory() / 'exported_leads' / self.openFile.with_suffix(".csv"), "Comma")
-                #self
+                #self.processEcgData(inputParameters)
+                self.processEcgDataNoDialog(inputParameters, exportDirectory / self.openFile.with_suffix(".csv").name, "Comma", imagePreviewDirectory)
             else:
                 warningDialog = MessageDialog(
                     message="Warning: No data to process\n\nPlease select at least one lead to digitize",
@@ -403,9 +409,6 @@ class MainController:
                 break
 
     def getMetaDataDirectory(self):
-        # probability density (/distribution) function
-        # probability mass function = discrete
-        # cumulative distribution function both
         metadataDirectory = Path.cwd() / '.paperecg'
         if not metadataDirectory.exists():
             metadataDirectory.mkdir()

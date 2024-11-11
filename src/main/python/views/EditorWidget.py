@@ -17,6 +17,7 @@ from QtWrapper import *
 from views.MessageDialog import *
 
 class Editor(QtWidgets.QWidget):
+    '''Creates the UI for the side panel editor, leads, and image view'''
     processEcgData = QtCore.pyqtSignal()
     saveAnnotationsButtonClicked = QtCore.pyqtSignal()
 
@@ -91,6 +92,18 @@ class Editor(QtWidgets.QWidget):
         self.EditPanelLeadView.deleteLeadRoi.connect(self.deleteLeadRoi)
 
     def loadSavedState(self, data):
+        self.EditPanelGlobalView.setRotation(data['rotation'])
+        self.EditPanelGlobalView.setValues(voltScale=data['voltageScale'], timeScale=data['timeScale'])
+        self.EditPanelGlobalView.setLastSavedTimeStamp(data['timeStamp'])
+
+        leads = data['leads']
+        for name in leads:
+            lead = leads[name]
+            cropping = lead['cropping']
+            self.addLead(leadIdEnum=LeadId[name], x=cropping['x'], y=cropping['y'], width=cropping['width'], height=cropping['height'], startTime=lead['start'])
+
+    ## dmchang: 9/30 Unnecessary?
+    def loadSavedPreset(self, data):
         self.EditPanelGlobalView.setRotation(data['rotation'])
         self.EditPanelGlobalView.setValues(voltScale=data['voltageScale'], timeScale=data['timeScale'])
         self.EditPanelGlobalView.setLastSavedTimeStamp(data['timeStamp'])

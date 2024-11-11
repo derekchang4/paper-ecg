@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 from numpy.lib.arraysetops import isin
 import scipy.stats as stats
+import ImageUtilities as imgU
 
 
 @dataclasses.dataclass(frozen=True)
@@ -102,7 +103,7 @@ def openImage(path: Path) -> ColorImage:
     assert isinstance(path, Path)
     assert path.exists()
 
-    data = cv2.imread(str(path))
+    data = imgU.readImage(path) #cv2.imread(str(path))
     assert data is not None
 
     return ColorImage(data)
